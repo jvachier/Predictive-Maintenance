@@ -14,23 +14,24 @@ def main():
 
     LOAD = loading.Loading_files()
 
-    if os.path.isfile("./pickle_files/loading/temperature") is False:
+    if os.path.isfile("./pickle_files/loading/telemetry") is False:
         (
-            df_extruder_mass_temperature,
-            df_extruder_mass_pressure,
-            df_extruder_motor_speed,
-            df_extruder_motor_current,
-            df_dosing_filling_on,
+            df_telemetry,
+            df_machines,
+            df_failures,
+            df_errors,
+            df_maintenance,
         ) = LOAD.load_save_df()
     else:
         (
-            df_extruder_mass_temperature,
-            df_extruder_mass_pressure,
-            df_extruder_motor_speed,
-            df_extruder_motor_current,
-            df_dosing_filling_on,
+            df_telemetry,
+            df_machines,
+            df_failures,
+            df_errors,
+            df_maintenance,
         ) = LOAD.load_db_file()
 
+    quit()
     data_tmp = data_preparation.Data_Preparation(
         df_extruder_mass_temperature, "Temperature(C)"
     )
