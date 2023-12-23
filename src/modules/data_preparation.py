@@ -3,9 +3,47 @@ import pickle
 
 
 class Data_Preparation:
-    def __init__(self, df: pd.DataFrame, name: str) -> None:
-        self.data: pd.DataFrame = df
-        self.feature: str = name
+    def __init__(
+        self,
+        df1: pd.DataFrame,
+        df2: pd.DataFrame,
+        df3: pd.DataFrame,
+        df5: pd.DataFrame,
+    ) -> None:
+        self.telemetry: pd.DataFrame = df1
+        self.maintenance: pd.DataFrame = df2
+        self.errors: pd.DataFrame = df3
+        self.failures: pd.DataFrame = df5 # target
+
+    def merge_df(self) -> pd.DataFrame:
+        
+        merged_failure_maint = Data_Preparation._merge1()
+
+        merge_df_feature_target = pd.merge(
+            merged_failure_maint, self.failures, 
+            how="left", 
+            on=["datetime", "machineID"]
+        )
+
+        return df_prepared
+
+
+    def _merge1(self) -> pd.DataFrame:
+        merged_failure_maint = pd.merge(
+            self.telemetry, self.maintenance, 
+            how="left", 
+            on=["datetime", "machineID"]
+        ) 
+        return merged_failure_maint
+
+    def _date_to_time(self) -> None:
+        self.telemetry["datetime"] = pd.to_datetime(self.telemetry["datetime"])
+        self.maintenance["datetime"] = pd.to_datetime(self.maintenance["datetime"])
+        self.errors["datetime"] = pd.to_datetime(self.errors["datetime"])
+        self.failures["datetime"] = pd.to_datetime(self.failures["datetime"])
+
+
+    def _feature_preparation(self):
 
     def data_structure(self) -> None:
         self.data[1] = self.data[1].str.replace(",", ".").astype(float)
