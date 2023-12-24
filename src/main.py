@@ -8,7 +8,6 @@ import modules.loading as loading
 
 
 def main():
-    # load data
     print("Loading data\n")
 
     LOAD = loading.Loading_files()
@@ -45,9 +44,7 @@ def main():
         LOAD_DATA.save_dataframe(data_set_prepared)
     else:
         data_set_prepared = LOAD_DATA.load_dataframe()
-    # test_machine1 = data_set_prepared.query("machineID == 1")
 
-    # models
     anomaly_on = "True"
     if anomaly_on != "True":
         print("Models prediction\n")

@@ -9,17 +9,14 @@ import os.path
 from sklearn.metrics import (
     precision_recall_fscore_support,
     RocCurveDisplay,
-    confusion_matrix,
 )
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
 
-from sklearn import metrics, datasets
-
-# from functools import reduce
+from sklearn import metrics
 
 
 import tensorflow as tf
@@ -29,8 +26,6 @@ from tensorflow.keras.optimizers.legacy import Adam
 
 
 class Predictions:
-    "Add description"
-
     def __init__(self, df) -> None:
         self.data: pd.DataFrame = df
 
@@ -192,7 +187,7 @@ class Save_Load_models:
 
 
 class Anomaly_detection_isolationforest:
-    def __init__(self, df: pd.DataFrame, feature_name: str):
+    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
         self.data: pd.DataFrame = df
         self.name: str = feature_name
         self.scaler_iso = None
@@ -200,9 +195,9 @@ class Anomaly_detection_isolationforest:
     def isolationforest(self) -> None:
         data_index = self.data.set_index("datetime")
         self.scaler_iso = StandardScaler()
-        np_scaled = self.scaler_iso.fit_transform(data_index.values.reshape(-1, 1))
+        np_scaled = self.scaler_iso.fit_transform(data_index.values)
         data = pd.DataFrame(np_scaled)
-        model_time_series_t = IsolationForest(n_estimators=500, contamination=0.1)
+        model_time_series_t = IsolationForest(n_estimators=500, contamination=0.01)
         model_time_series_t.fit(data.values)
         self.data["anomaly"] = model_time_series_t.predict(data.values)
 
@@ -224,7 +219,7 @@ class Anomaly_detection_isolationforest:
 
 
 class Anomaly_detection_autoencoder:
-    def __init__(self, df: pd.DataFrame, feature_name: str):
+    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
         self.data: pd.DataFrame = df
         self.name: str = feature_name
         self.scaler_auto = None
@@ -273,7 +268,7 @@ class Anomaly_detection_autoencoder:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
         anomaly_deep_scores.index = self.data[49:].index
 
-        threshold_deep = anomaly_deep_scores.quantile(0.98)
+        threshold_deep = anomaly_deep_scores.quantile(0.999)
         anomalous_deep = anomaly_deep_scores > threshold_deep
         binary_labels_deep = anomalous_deep.astype(int)
         precision, recall, f1_score, _ = precision_recall_fscore_support(
