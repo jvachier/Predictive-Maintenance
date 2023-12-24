@@ -13,49 +13,49 @@ class Data_Preparation:
         self.telemetry: pd.DataFrame = df1
         self.maintenance: pd.DataFrame = df2
         self.errors: pd.DataFrame = df3
-        self.failures: pd.DataFrame = df5 # target
+        self.failures: pd.DataFrame = df5  # target
+
+    def df_prepared(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.fillna(0)
+        df.loc[df["failure"] != 0, "failure"] = 1
+        return df
 
     def merge_df(self) -> pd.DataFrame:
-        
-        merged_failure_maint = Data_Preparation._merge1()
-
-        merge_df_feature_target = pd.merge(
-            merged_failure_maint, self.failures, 
-            how="left", 
-            on=["datetime", "machineID"]
+        maintenance_dummies = pd.get_dummies(
+            self.maintenance, columns=["comp"], drop_first=True
+        )
+        errors_dummies = pd.get_dummies(
+            self.errors, columns=["errorID"], drop_first=True
         )
 
-        return df_prepared
+        merged_failure_maint = self._merge1(self.telemetry, maintenance_dummies)
+        merged_failure_maint_error = self._merge1(merged_failure_maint, errors_dummies)
 
+        merge_df_feature_target = pd.merge(
+            merged_failure_maint_error,
+            self.failures,
+            how="left",
+            on=["datetime", "machineID"],
+        )
+        return merge_df_feature_target
 
-    def _merge1(self) -> pd.DataFrame:
-        merged_failure_maint = pd.merge(
-            self.telemetry, self.maintenance, 
-            how="left", 
-            on=["datetime", "machineID"]
-        ) 
-        return merged_failure_maint
-
-    def _date_to_time(self) -> None:
+    def date_to_time(self) -> None:
         self.telemetry["datetime"] = pd.to_datetime(self.telemetry["datetime"])
         self.maintenance["datetime"] = pd.to_datetime(self.maintenance["datetime"])
         self.errors["datetime"] = pd.to_datetime(self.errors["datetime"])
         self.failures["datetime"] = pd.to_datetime(self.failures["datetime"])
 
+    def _merge1(self, features1: pd.DataFrame, feature2: pd.DataFrame) -> pd.DataFrame:
+        merged_failure_maint = pd.merge(
+            features1, feature2, how="left", on=["datetime", "machineID"]
+        )
+        return merged_failure_maint
 
-    def _feature_preparation(self):
-
-    def data_structure(self) -> None:
-        self.data[1] = self.data[1].str.replace(",", ".").astype(float)
-
-    def data_time(self) -> pd.DataFrame:
-        self.data = self.data[[0, 1]]
-        self.data = self.data.rename(columns={0: "Time", 1: str(self.feature)})
-        self.data["Time"] = pd.to_datetime(self.data["Time"])
-        return self.data
+    # def _get_dummies_funct(self, feature: pd.DataFrame, name: str) -> pd.DataFrame:
+    #     return pd.get_dummies(feature, columns=[name], drop_first=True)
 
 
-class Load:
+class Load_Save:
     def __init__(self) -> None:
         pass
 
@@ -63,49 +63,6 @@ class Load:
         dbfile_dataframe = open("./pickle_files/data_preparation/data_set", "rb")
         data_set = pickle.load(dbfile_dataframe)
         dbfile_dataframe.close()
-        return data_set
-
-
-class Data_Set:
-    def __init__(
-        self,
-        df1: pd.DataFrame,
-        df2: pd.DataFrame,
-        df3: pd.DataFrame,
-        df4: pd.DataFrame,
-        df5: pd.DataFrame,
-    ) -> None:
-        self.feature1: pd.DataFrame = df1
-        self.feature2: pd.DataFrame = df2
-        self.feature3: pd.DataFrame = df3
-        self.feature4: pd.DataFrame = df4
-        self.target: pd.DataFrame = df5
-
-    def merge(self) -> pd.DataFrame:
-        merged_dataframe = pd.merge_asof(
-            self.feature1.sort_values("Time"),
-            self.feature2.sort_values("Time"),
-            on="Time",
-        )
-
-        merged_dataframe2 = pd.merge_asof(
-            merged_dataframe.sort_values("Time"),
-            self.feature3.sort_values("Time"),
-            on="Time",
-        )
-
-        merged_dataframe3 = pd.merge_asof(
-            merged_dataframe2.sort_values("Time"),
-            self.feature4.sort_values("Time"),
-            on="Time",
-        )
-
-        data_set = pd.merge_asof(
-            merged_dataframe3.sort_values("Time"),
-            self.target.sort_values("Time"),
-            on="Time",
-        )
-        data_set = data_set.dropna()
         return data_set
 
     def save_dataframe(self, data_set: pd.DataFrame) -> None:

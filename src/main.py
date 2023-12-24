@@ -31,50 +31,24 @@ def main():
             df_maintenance,
         ) = LOAD.load_db_file()
 
-    quit()
-    data_tmp = data_preparation.Data_Preparation(
-        df_extruder_mass_temperature, "Temperature(C)"
+    DATA = data_preparation.Data_Preparation(
+        df_telemetry,
+        df_maintenance,
+        df_errors,
+        df_failures,
     )
-
-    data_pressure = data_preparation.Data_Preparation(
-        df_extruder_mass_pressure, "Pressure(bar)"
-    )
-
-    data_target = data_preparation.Data_Preparation(df_dosing_filling_on, "Target")
-
-    data_speed = data_preparation.Data_Preparation(
-        df_extruder_motor_speed, "Speed(r/min)"
-    )
-    data_current = data_preparation.Data_Preparation(
-        df_extruder_motor_current, "Current(A)"
-    )
-
-    set_load = data_preparation.Load()
+    LOAD_DATA = data_preparation.Load_Save()
 
     if os.path.isfile("./pickle_files/data_preparation/data_set") is False:
-        data_speed.data_structure()
-        data_current.data_structure()
-
-        tmp = data_tmp.data_time()
-        pressure = data_pressure.data_time()
-        speed = data_speed.data_time()
-        current = data_current.data_time()
-        target = data_target.data_time()
-
-        data_set = data_preparation.Data_Set(
-            tmp,
-            pressure,
-            speed,
-            current,
-            target,
-        )
-
-        Set = data_set.merge()
-        data_set.save_dataframe(Set)
-
+        DATA.date_to_time()
+        data_set = DATA.merge_df()
+        data_set_prepared = DATA.df_prepared(data_set)
+        LOAD_DATA.save_dataframe(data_set_prepared)
     else:
-        Set = set_load.load_dataframe()
+        data_set_prepared = LOAD_DATA.load_dataframe()
+    # test_machine1 = data_set_prepared.query("machineID == 1")
 
+    quit()
     # models
 
     anomaly_on = "False"
