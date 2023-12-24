@@ -2,7 +2,6 @@ import os.path
 import pandas as pd
 from keras.models import load_model
 
-# modules / classes
 import modules.data_preparation as data_preparation
 import modules.models as models
 import modules.loading as loading
@@ -48,17 +47,16 @@ def main():
         data_set_prepared = LOAD_DATA.load_dataframe()
     # test_machine1 = data_set_prepared.query("machineID == 1")
 
-    quit()
     # models
-
-    anomaly_on = "False"
+    anomaly_on = "True"
     if anomaly_on != "True":
         print("Models prediction\n")
-        model = models.Predictions(Set)
+        model = models.Predictions(data_set_prepared)
 
         save_model = models.Save_Load_models()
 
         X_train, X_test, y_train, y_test = model.train_split()
+
         if os.path.isfile("./pickle_files/models/lr") is False:
             pipe_lr, y_predic_lr, y_predic_lr_proba = model.model_lr(
                 X_train, y_train, X_test
@@ -85,14 +83,12 @@ def main():
     else:
         print("\n")
         print("Models Anomaly Detection\n")
-        tmp = data_tmp.data_time()
-        pressure = data_pressure.data_time()
 
         anomaly_isolation = models.Anomaly_detection_isolationforest(
-            pressure, "Pressure(bar)"
+            df_telemetry, "volt"
         )
         anomaly_autoencoder = models.Anomaly_detection_autoencoder(
-            pressure, "Pressure(bar)"
+            df_telemetry, "pressure"
         )
 
         anomaly_isolation.isolationforest()

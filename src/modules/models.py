@@ -36,12 +36,10 @@ class Predictions:
 
     def train_split(self) -> list:
         X_train, X_test, y_train, y_test = train_test_split(
-            self.data[
-                ["Pressure(bar)", "Temperature(C)", "Speed(r/min)", "Current(A)"]
-            ].values,
-            self.data["Target"].values,
+            self.data.drop(columns=["datetime", "failure"]).values,
+            self.data["failure"].values,
             test_size=0.20,
-            stratify=self.data["Target"].values,
+            stratify=self.data["failure"].values,
             random_state=1,
         )
         return X_train, X_test, y_train, y_test
@@ -51,7 +49,7 @@ class Predictions:
             StandardScaler(),
             LogisticRegression(random_state=1, solver="lbfgs", max_iter=10000),
         ).fit(X_train, y_train)
-        y_predic_lr = pipe_lr.predict(X_test)  # here add predict proba
+        y_predic_lr = pipe_lr.predict(X_test)
         y_predic_lr_proba = pipe_lr.predict_proba(X_test)
         return pipe_lr, y_predic_lr, y_predic_lr_proba
 
@@ -89,8 +87,8 @@ class Predictions:
 
     def visualization_prediction(self, y_test: list, y_pred: list, name: str) -> None:
         plt.figure(2)
-        plt.plot(y_test[:200], "+", label="Real")
-        plt.plot(y_pred[:200], ".", label="Predicted")
+        plt.plot(y_test, "+", label="Real")
+        plt.plot(y_pred, ".", label="Predicted")
         plt.ylabel("Target")
         plt.legend()
         plt.title(str(name))
@@ -200,14 +198,13 @@ class Anomaly_detection_isolationforest:
         self.scaler_iso = None
 
     def isolationforest(self) -> None:
-        data_index = self.data.set_index("Time")
+        data_index = self.data.set_index("datetime")
         self.scaler_iso = StandardScaler()
         np_scaled = self.scaler_iso.fit_transform(data_index.values.reshape(-1, 1))
         data = pd.DataFrame(np_scaled)
         model_time_series_t = IsolationForest(n_estimators=500, contamination=0.1)
         model_time_series_t.fit(data.values)
         self.data["anomaly"] = model_time_series_t.predict(data.values)
-        # return add it later on
 
     def visulaization_isolationforest(self) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -235,7 +232,7 @@ class Anomaly_detection_autoencoder:
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
         self.data[self.name] = self.scaler_auto.fit_transform(self.data[[self.name]])
-        data = self.data.drop(columns=["Time", "anomaly"], axis=1).values
+        data = self.data.drop(columns=["datetime", "anomaly"], axis=1).values
         # data = self.data[self.name].values
         x_train = self._create_sequences(data, 50)
         return x_train
@@ -287,12 +284,12 @@ class Anomaly_detection_autoencoder:
 
         plt.figure(figsize=(16, 8))
         plt.plot(
-            self.data["Time"],
+            self.data["datetime"],
             self.scaler_auto.inverse_transform(self.data[[self.name]]),
             "k",
         )
         plt.plot(
-            self.data["Time"][49:][anomalous_deep],
+            self.data["datetime"][49:][anomalous_deep],
             self.scaler_auto.inverse_transform(
                 self.data[[self.name]][49:][anomalous_deep]
             ),
