@@ -16,8 +16,7 @@
 *.keras
 *data/
 *videos/
-*models/
-*pickles/
+*pickle_files/
 
 # Ignore specific file
 test.mp4
