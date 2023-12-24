@@ -17,6 +17,7 @@
 *data/
 *videos/
 *pickle_files/
+*.pyc
 
 # Ignore specific file
 test.mp4

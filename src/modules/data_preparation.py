@@ -51,9 +51,6 @@ class Data_Preparation:
         )
         return merged_failure_maint
 
-    # def _get_dummies_funct(self, feature: pd.DataFrame, name: str) -> pd.DataFrame:
-    #     return pd.get_dummies(feature, columns=[name], drop_first=True)
-
 
 class Load_Save:
     def __init__(self) -> None:
