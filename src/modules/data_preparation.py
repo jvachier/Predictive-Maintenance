@@ -18,14 +18,15 @@ class Data_Preparation:
     def df_prepared(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.fillna(0)
         df.loc[df["failure"] != 0, "failure"] = 1
+        df["failure"] = df["failure"].astype("int64")
         return df
 
     def merge_df(self) -> pd.DataFrame:
         maintenance_dummies = pd.get_dummies(
-            self.maintenance, columns=["comp"], drop_first=True
+            self.maintenance, columns=["comp"], drop_first=True, dtype=int
         )
         errors_dummies = pd.get_dummies(
-            self.errors, columns=["errorID"], drop_first=True
+            self.errors, columns=["errorID"], drop_first=True, dtype=int
         )
 
         merged_failure_maint = self._merge1(self.telemetry, maintenance_dummies)
@@ -50,9 +51,6 @@ class Data_Preparation:
             features1, feature2, how="left", on=["datetime", "machineID"]
         )
         return merged_failure_maint
-
-    # def _get_dummies_funct(self, feature: pd.DataFrame, name: str) -> pd.DataFrame:
-    #     return pd.get_dummies(feature, columns=[name], drop_first=True)
 
 
 class Load_Save:

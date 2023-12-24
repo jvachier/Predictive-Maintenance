@@ -9,17 +9,14 @@ import os.path
 from sklearn.metrics import (
     precision_recall_fscore_support,
     RocCurveDisplay,
-    confusion_matrix,
 )
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
 
-from sklearn import metrics, datasets
-
-# from functools import reduce
+from sklearn import metrics
 
 
 import tensorflow as tf
@@ -29,19 +26,15 @@ from tensorflow.keras.optimizers.legacy import Adam
 
 
 class Predictions:
-    "Add description"
-
     def __init__(self, df) -> None:
         self.data: pd.DataFrame = df
 
     def train_split(self) -> list:
         X_train, X_test, y_train, y_test = train_test_split(
-            self.data[
-                ["Pressure(bar)", "Temperature(C)", "Speed(r/min)", "Current(A)"]
-            ].values,
-            self.data["Target"].values,
+            self.data.drop(columns=["datetime", "failure"]).values,
+            self.data["failure"].values,
             test_size=0.20,
-            stratify=self.data["Target"].values,
+            stratify=self.data["failure"].values,
             random_state=1,
         )
         return X_train, X_test, y_train, y_test
@@ -51,7 +44,7 @@ class Predictions:
             StandardScaler(),
             LogisticRegression(random_state=1, solver="lbfgs", max_iter=10000),
         ).fit(X_train, y_train)
-        y_predic_lr = pipe_lr.predict(X_test)  # here add predict proba
+        y_predic_lr = pipe_lr.predict(X_test)
         y_predic_lr_proba = pipe_lr.predict_proba(X_test)
         return pipe_lr, y_predic_lr, y_predic_lr_proba
 
@@ -89,8 +82,8 @@ class Predictions:
 
     def visualization_prediction(self, y_test: list, y_pred: list, name: str) -> None:
         plt.figure(2)
-        plt.plot(y_test[:200], "+", label="Real")
-        plt.plot(y_pred[:200], ".", label="Predicted")
+        plt.plot(y_test, "+", label="Real")
+        plt.plot(y_pred, ".", label="Predicted")
         plt.ylabel("Target")
         plt.legend()
         plt.title(str(name))
@@ -194,20 +187,19 @@ class Save_Load_models:
 
 
 class Anomaly_detection_isolationforest:
-    def __init__(self, df: pd.DataFrame, feature_name: str):
+    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
         self.data: pd.DataFrame = df
         self.name: str = feature_name
         self.scaler_iso = None
 
     def isolationforest(self) -> None:
-        data_index = self.data.set_index("Time")
+        data_index = self.data.set_index("datetime")
         self.scaler_iso = StandardScaler()
-        np_scaled = self.scaler_iso.fit_transform(data_index.values.reshape(-1, 1))
+        np_scaled = self.scaler_iso.fit_transform(data_index.values)
         data = pd.DataFrame(np_scaled)
-        model_time_series_t = IsolationForest(n_estimators=500, contamination=0.1)
+        model_time_series_t = IsolationForest(n_estimators=500, contamination=0.01)
         model_time_series_t.fit(data.values)
         self.data["anomaly"] = model_time_series_t.predict(data.values)
-        # return add it later on
 
     def visulaization_isolationforest(self) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -227,7 +219,7 @@ class Anomaly_detection_isolationforest:
 
 
 class Anomaly_detection_autoencoder:
-    def __init__(self, df: pd.DataFrame, feature_name: str):
+    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
         self.data: pd.DataFrame = df
         self.name: str = feature_name
         self.scaler_auto = None
@@ -235,7 +227,7 @@ class Anomaly_detection_autoencoder:
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
         self.data[self.name] = self.scaler_auto.fit_transform(self.data[[self.name]])
-        data = self.data.drop(columns=["Time", "anomaly"], axis=1).values
+        data = self.data.drop(columns=["datetime", "anomaly"], axis=1).values
         # data = self.data[self.name].values
         x_train = self._create_sequences(data, 50)
         return x_train
@@ -276,7 +268,7 @@ class Anomaly_detection_autoencoder:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
         anomaly_deep_scores.index = self.data[49:].index
 
-        threshold_deep = anomaly_deep_scores.quantile(0.98)
+        threshold_deep = anomaly_deep_scores.quantile(0.999)
         anomalous_deep = anomaly_deep_scores > threshold_deep
         binary_labels_deep = anomalous_deep.astype(int)
         precision, recall, f1_score, _ = precision_recall_fscore_support(
@@ -287,12 +279,12 @@ class Anomaly_detection_autoencoder:
 
         plt.figure(figsize=(16, 8))
         plt.plot(
-            self.data["Time"],
+            self.data["datetime"],
             self.scaler_auto.inverse_transform(self.data[[self.name]]),
             "k",
         )
         plt.plot(
-            self.data["Time"][49:][anomalous_deep],
+            self.data["datetime"][49:][anomalous_deep],
             self.scaler_auto.inverse_transform(
                 self.data[[self.name]][49:][anomalous_deep]
             ),
