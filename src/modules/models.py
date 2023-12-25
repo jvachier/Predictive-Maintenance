@@ -204,23 +204,15 @@ class Anomaly_detection_isolationforest:
 
     def visulaization_isolationforest(self) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
-        data = self.data.copy()
-        data = data.set_index("datetime")
-        a = data.loc[data["anomaly"] == -1, [self.name]]  # anomaly
-        data.plot(y=self.name, ax=ax, color="black", label="Normal")
-        # a.plot(kind="scatter", ax=ax, x=a.index, y=self.name)
-        # a.reset_index().plot.scatter(
-        #     x=a.index, y=self.name, ax=ax, color="red", label="Anomaly"
-        # )
+        a = self.data.loc[self.data["anomaly"] == -1, [self.name]]  # anomaly
 
-        # ax.plot(
-        #     data.index,
-        #     data[self.name],
-        #     color="black",
-        #     label="Normal",
-        # )
+        ax.plot(
+            self.data.index,
+            self.data[self.name],
+            color="black",
+            label="Normal",
+        )
         ax.scatter(a.index, a[self.name], color="red", label="Anomaly")
-        # ax.scatter(a["datetime"], a[self.name], color="red", label="Anomaly")
         plt.legend()
         plt.ylabel(self.name, fontsize=13)
         plt.xlabel("Time", fontsize=13)
