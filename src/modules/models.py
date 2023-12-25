@@ -189,7 +189,7 @@ class Save_Load_models:
 class Anomaly_detection_isolationforest:
     def __init__(self, df: pd.DataFrame, feature_name: str, machine_name: int) -> None:
         self.machine_name: int = machine_name
-        self.data: pd.DataFrame = df[df["machineID"] == self.machine_name]
+        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
         self.name: str = feature_name
         self.scaler_iso = None
 
@@ -204,14 +204,23 @@ class Anomaly_detection_isolationforest:
 
     def visulaization_isolationforest(self) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
-        a = self.data.loc[self.data["anomaly"] == -1, [self.name]]  # anomaly
-        ax.plot(
-            self.data.index,
-            self.data[self.name],
-            color="black",
-            label="Normal",
-        )
+        data = self.data.copy()
+        data = data.set_index("datetime")
+        a = data.loc[data["anomaly"] == -1, [self.name]]  # anomaly
+        data.plot(y=self.name, ax=ax, color="black", label="Normal")
+        # a.plot(kind="scatter", ax=ax, x=a.index, y=self.name)
+        # a.reset_index().plot.scatter(
+        #     x=a.index, y=self.name, ax=ax, color="red", label="Anomaly"
+        # )
+
+        # ax.plot(
+        #     data.index,
+        #     data[self.name],
+        #     color="black",
+        #     label="Normal",
+        # )
         ax.scatter(a.index, a[self.name], color="red", label="Anomaly")
+        # ax.scatter(a["datetime"], a[self.name], color="red", label="Anomaly")
         plt.legend()
         plt.ylabel(self.name, fontsize=13)
         plt.xlabel("Time", fontsize=13)
@@ -224,7 +233,7 @@ class Anomaly_detection_autoencoder:
         self, df: pd.DataFrame, feature_name: str, machine_name: int, time_step: int
     ) -> None:
         self.machine_name: int = machine_name
-        self.data: pd.DataFrame = df[df["machineID"] == self.machine_name]
+        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
         self.name: str = feature_name
         self.scaler_auto = None
         self.time_step: int = time_step

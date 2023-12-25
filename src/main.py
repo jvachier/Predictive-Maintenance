@@ -45,7 +45,7 @@ def main():
     else:
         data_set_prepared = LOAD_DATA.load_dataframe()
 
-    anomaly_on = "False"
+    anomaly_on = "True"
     if anomaly_on != "True":
         print("Models prediction\n")
         model = models.Predictions(data_set_prepared)
@@ -82,10 +82,10 @@ def main():
         print("Models Anomaly Detection\n")
 
         anomaly_isolation = models.Anomaly_detection_isolationforest(
-            df_telemetry, "volt", 1
+            df_telemetry, "pressure", 1
         )
         anomaly_autoencoder = models.Anomaly_detection_autoencoder(
-            df_telemetry, "volt", 1, 5
+            df_telemetry, "pressure", 1, 5
         )
 
         anomaly_isolation.isolationforest()
