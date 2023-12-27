@@ -19,6 +19,8 @@
 *pickle_files/
 *.pyc
 *__pycache__/
+__pycache__/
+*.so
 
 # Ignore specific file
 test.mp4
