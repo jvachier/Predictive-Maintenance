@@ -78,6 +78,7 @@ class Predictions:
             clf_disp = RocCurveDisplay.from_estimator(
                 j, x_tests[i], y_tests[i], ax=ax, name=names[i], alpha=0.8
             )
+        plt.savefig("./figures/roc_curves.png")
         plt.show()
 
     def visualization_prediction(self, y_test: list, y_pred: list, name: str) -> None:
@@ -87,6 +88,8 @@ class Predictions:
         plt.ylabel("Target")
         plt.legend()
         plt.title(str(name))
+        if os.path.isfile("./figures/predictions.png") is False:
+            plt.savefig("./figures/predictions.png")
         plt.show()
 
     def visualization_accuracy(self, model, name: str, X_train, y_train: list) -> None:
@@ -144,7 +147,8 @@ class Predictions:
         plt.ylabel("Accuracy")
         plt.legend(loc="lower right")
         plt.title(str(name))
-        # plt.savefig("./figures/accuracy_" + str(name) + ".png")
+        if os.path.isfile("./figures/accuracy_" + str(name) + ".png") is False:
+            plt.savefig("./figures/accuracy_" + str(name) + ".png")
         plt.show()
 
 
@@ -216,7 +220,8 @@ class Anomaly_detection_isolationforest:
         plt.legend()
         plt.ylabel(self.name, fontsize=13)
         plt.xlabel("Time", fontsize=13)
-        # plt.savefig('anomaly_extruder_mass_temperature.png')
+        if os.path.isfile("./figures/anomaly_isolation_forest.png") is False:
+            plt.savefig("./figures/anomaly_isolation_forest.png")
         plt.show()
 
 
@@ -272,7 +277,7 @@ class Anomaly_detection_autoencoder:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
         anomaly_deep_scores.index = self.data[(self.time_step - 1) :].index
 
-        threshold_deep = anomaly_deep_scores.quantile(0.98)
+        threshold_deep = anomaly_deep_scores.quantile(0.95)
         anomalous_deep = anomaly_deep_scores > threshold_deep
         binary_labels_deep = anomalous_deep.astype(int)
         precision, recall, f1_score, _ = precision_recall_fscore_support(
@@ -296,6 +301,8 @@ class Anomaly_detection_autoencoder:
         plt.title("Anomaly Detection")
         plt.xlabel("Time")
         plt.ylabel(self.name)
+        if os.path.isfile("./figures/anomaly_autoencoder.png") is False:
+            plt.savefig("./figures/anomaly_autoencoder.png")
         plt.show()
 
     def _create_sequences(self, values: list) -> np.array:

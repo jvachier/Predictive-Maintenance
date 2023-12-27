@@ -7,6 +7,9 @@ import modules.models as models
 import modules.loading as loading
 
 
+import sys
+
+
 def main():
     print("Loading data\n")
 
@@ -45,8 +48,9 @@ def main():
     else:
         data_set_prepared = LOAD_DATA.load_dataframe()
 
-    anomaly_on = "True"
-    if anomaly_on != "True":
+    prediction_on = sys.argv[1]
+
+    if prediction_on == "True":
         print("Models prediction\n")
         model = models.Predictions(data_set_prepared)
 
