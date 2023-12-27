@@ -78,6 +78,7 @@ class Predictions:
             clf_disp = RocCurveDisplay.from_estimator(
                 j, x_tests[i], y_tests[i], ax=ax, name=names[i], alpha=0.8
             )
+        plt.savefig("./figures/roc_curves.png")
         plt.show()
 
     def visualization_prediction(self, y_test: list, y_pred: list, name: str) -> None:
@@ -87,6 +88,8 @@ class Predictions:
         plt.ylabel("Target")
         plt.legend()
         plt.title(str(name))
+        if os.path.isfile("./figures/predictions.png") is False:
+            plt.savefig("./figures/predictions.png")
         plt.show()
 
     def visualization_accuracy(self, model, name: str, X_train, y_train: list) -> None:
@@ -144,7 +147,8 @@ class Predictions:
         plt.ylabel("Accuracy")
         plt.legend(loc="lower right")
         plt.title(str(name))
-        # plt.savefig("./figures/accuracy_" + str(name) + ".png")
+        if os.path.isfile("./figures/accuracy_" + str(name) + ".png") is False:
+            plt.savefig("./figures/accuracy_" + str(name) + ".png")
         plt.show()
 
 
@@ -187,8 +191,9 @@ class Save_Load_models:
 
 
 class Anomaly_detection_isolationforest:
-    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
-        self.data: pd.DataFrame = df
+    def __init__(self, df: pd.DataFrame, feature_name: str, machine_name: int) -> None:
+        self.machine_name: int = machine_name
+        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
         self.name: str = feature_name
         self.scaler_iso = None
 
@@ -204,6 +209,7 @@ class Anomaly_detection_isolationforest:
     def visulaization_isolationforest(self) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
         a = self.data.loc[self.data["anomaly"] == -1, [self.name]]  # anomaly
+
         ax.plot(
             self.data.index,
             self.data[self.name],
@@ -214,28 +220,31 @@ class Anomaly_detection_isolationforest:
         plt.legend()
         plt.ylabel(self.name, fontsize=13)
         plt.xlabel("Time", fontsize=13)
-        # plt.savefig('anomaly_extruder_mass_temperature.png')
+        if os.path.isfile("./figures/anomaly_isolation_forest.png") is False:
+            plt.savefig("./figures/anomaly_isolation_forest.png")
         plt.show()
 
 
 class Anomaly_detection_autoencoder:
-    def __init__(self, df: pd.DataFrame, feature_name: str) -> None:
-        self.data: pd.DataFrame = df
+    def __init__(
+        self, df: pd.DataFrame, feature_name: str, machine_name: int, time_step: int
+    ) -> None:
+        self.machine_name: int = machine_name
+        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
         self.name: str = feature_name
         self.scaler_auto = None
+        self.time_step: int = time_step
 
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
         self.data[self.name] = self.scaler_auto.fit_transform(self.data[[self.name]])
-        data = self.data.drop(columns=["datetime", "anomaly"], axis=1).values
-        # data = self.data[self.name].values
-        x_train = self._create_sequences(data, 50)
+        data = self.data.drop(columns=["datetime"], axis=1).values
+        x_train = self._create_sequences(data)
         return x_train
 
     def result_autocendoer(self, model, x_train: np.array) -> tf:
         # Calculate the reconstruction error for each data point
         reconstructions_deep = model.predict(x_train)
-
         mse = tf.reduce_mean(tf.square(x_train - reconstructions_deep), axis=[1, 2])
         return mse
 
@@ -252,10 +261,10 @@ class Anomaly_detection_autoencoder:
         # Compile and fit the model
         autoencoder_deep = Model(input_layer, decoded)
         autoencoder_deep.compile(
-            optimizer=Adam(learning_rate=0.0001), loss="mse", metrics=["accuracy"]
+            optimizer=Adam(learning_rate=0.00001), loss="mse", metrics=["accuracy"]
         )
         autoencoder_deep.fit(
-            x_train, x_train, epochs=10, batch_size=128, validation_split=0.1
+            x_train, x_train, epochs=500, batch_size=128, validation_split=0.1
         )
 
         if os.path.isfile("./pickle_files/models/autoencoder.keras") is False:
@@ -264,40 +273,40 @@ class Anomaly_detection_autoencoder:
 
     def Anomaly(self, mse: tf) -> None:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
-        anomaly_deep_scores.index = self.data[49:].index
+        anomaly_deep_scores.index = self.data[(self.time_step - 1) :].index
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
-        anomaly_deep_scores.index = self.data[49:].index
+        anomaly_deep_scores.index = self.data[(self.time_step - 1) :].index
 
-        threshold_deep = anomaly_deep_scores.quantile(0.999)
+        threshold_deep = anomaly_deep_scores.quantile(0.95)
         anomalous_deep = anomaly_deep_scores > threshold_deep
         binary_labels_deep = anomalous_deep.astype(int)
         precision, recall, f1_score, _ = precision_recall_fscore_support(
             binary_labels_deep,
             anomalous_deep,
-            # average='binary'
         )
 
         plt.figure(figsize=(16, 8))
         plt.plot(
-            self.data["datetime"],
+            self.data.index,
             self.scaler_auto.inverse_transform(self.data[[self.name]]),
             "k",
         )
         plt.plot(
-            self.data["datetime"][49:][anomalous_deep],
+            self.data.index[(self.time_step - 1) :][anomalous_deep],
             self.scaler_auto.inverse_transform(
-                self.data[[self.name]][49:][anomalous_deep]
+                self.data[[self.name]][(self.time_step - 1) :][anomalous_deep]
             ),
             "ro",
         )
         plt.title("Anomaly Detection")
         plt.xlabel("Time")
         plt.ylabel(self.name)
-        # plt.savefig('anomaly_extruder_mass_pressure_autoencoder_higher_complexity.png')
+        if os.path.isfile("./figures/anomaly_autoencoder.png") is False:
+            plt.savefig("./figures/anomaly_autoencoder.png")
         plt.show()
 
-    def _create_sequences(self, values: list, time_steps: int) -> np.array:
+    def _create_sequences(self, values: list) -> np.array:
         output = []
-        for i in range(len(values) - time_steps + 1):
-            output.append(values[i : (i + time_steps)])
+        for i in range(len(values) - self.time_step + 1):
+            output.append(values[i : (i + self.time_step)])
         return np.stack(output)
