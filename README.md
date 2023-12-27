@@ -1,6 +1,6 @@
 # Predictive Maintenance
 
-The data sued over one hundred machines and consisting of:
+The data used over one hundred machines and consisting of:
 - Sensor data, such as Pressure, Voltage, Rotation, and Vibration
 - Failure and Maintenance history
 - Machine logs such as error types.
