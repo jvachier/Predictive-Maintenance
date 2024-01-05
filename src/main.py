@@ -10,7 +10,7 @@ import modules.loading as loading
 import sys
 
 
-def main():
+def main() -> None:
     print("Loading data\n")
 
     LOAD = loading.Loading_files()
