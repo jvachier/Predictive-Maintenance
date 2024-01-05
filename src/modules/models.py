@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import pickle
 import os.path
 
+from dataclasses import dataclass
+from typing import Tuple
 
 from sklearn.metrics import (
     precision_recall_fscore_support,
@@ -25,11 +27,11 @@ from keras.models import Model
 from tensorflow.keras.optimizers.legacy import Adam
 
 
+@dataclass(slots=True)
 class Predictions:
-    def __init__(self, df) -> None:
-        self.data: pd.DataFrame = df
+    data: pd.DataFrame
 
-    def train_split(self) -> list:
+    def train_split(self) -> Tuple[np.array, np.array, list, list]:
         X_train, X_test, y_train, y_test = train_test_split(
             self.data.drop(columns=["datetime", "failure"]).values,
             self.data["failure"].values,
@@ -39,7 +41,9 @@ class Predictions:
         )
         return X_train, X_test, y_train, y_test
 
-    def model_lr(self, X_train, y_train: list, X_test):
+    def model_lr(
+        self, X_train: np.array, y_train: list, X_test: np.array
+    ) -> Tuple[object, np.array, np.array]:
         pipe_lr = make_pipeline(
             StandardScaler(),
             LogisticRegression(random_state=1, solver="lbfgs", max_iter=10000),
@@ -48,7 +52,9 @@ class Predictions:
         y_predic_lr_proba = pipe_lr.predict_proba(X_test)
         return pipe_lr, y_predic_lr, y_predic_lr_proba
 
-    def model_RF(self, X_train, y_train: list, X_test):
+    def model_RF(
+        self, X_train: np.array, y_train: list, X_test: np.array
+    ) -> Tuple[object, np.array, np.array]:
         clf_RFC = RandomForestClassifier(
             n_estimators=25,
             max_depth=10,
@@ -65,7 +71,9 @@ class Predictions:
         score = metrics.auc(fpr, tpr)
         print("AUC score " + str(name) + ":" + str(score))
 
-    def roc_curve(self, model1, model2, X_test, y_test: list) -> None:
+    def roc_curve(
+        self, model1: object, model2: object, X_test: np.array, y_test: list
+    ) -> None:
         plt.figure(1)
         models = [model1, model2]
         x_tests = [X_test, X_test]
@@ -92,7 +100,9 @@ class Predictions:
             plt.savefig("./figures/predictions.png")
         plt.show()
 
-    def visualization_accuracy(self, model, name: str, X_train, y_train: list) -> None:
+    def visualization_accuracy(
+        self, model: object, name: str, X_train, y_train: list
+    ) -> None:
         plt.figure(3)
         train_sizes, train_scores, test_scores = learning_curve(
             estimator=model,
@@ -152,12 +162,10 @@ class Predictions:
         plt.show()
 
 
+@dataclass(slots=True)
 class Save_Load_models:
-    def __init__(self) -> None:
-        pass
-
     def save_model_sklearn(
-        self, name: str, model, prediction: np.array, prediction_proba: np.array
+        self, name: str, model: object, prediction: np.array, prediction_proba: np.array
     ) -> None:
         dbfile_model = open("./pickle_files/models/" + str(name), "ab")
         dbfile_prediction = open(
@@ -190,12 +198,21 @@ class Save_Load_models:
         return model_loaded, predictions_loaded, prediction_proba_loaded
 
 
+@dataclass(slots=True)
 class Anomaly_detection_isolationforest:
-    def __init__(self, df: pd.DataFrame, feature_name: str, machine_name: int) -> None:
-        self.machine_name: int = machine_name
-        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
-        self.name: str = feature_name
-        self.scaler_iso = None
+    machine_name: int
+    data: pd.DataFrame
+    name: str
+    scaler_iso = None
+
+    def __post_init__(self):
+        self.data = self.data.query("machineID == @self.machine_name")
+
+    # def __init__(self, df: pd.DataFrame, feature_name: str, machine_name: int) -> None:
+    #     self.machine_name: int = machine_name
+    #     self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
+    #     self.name: str = feature_name
+    #     self.scaler_iso = None
 
     def isolationforest(self) -> None:
         data_index = self.data.set_index("datetime")

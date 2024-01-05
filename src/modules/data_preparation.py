@@ -1,19 +1,15 @@
 import pandas as pd
 import pickle
 
+from dataclasses import dataclass
 
+
+@dataclass(slots=True)
 class Data_Preparation:
-    def __init__(
-        self,
-        df1: pd.DataFrame,
-        df2: pd.DataFrame,
-        df3: pd.DataFrame,
-        df5: pd.DataFrame,
-    ) -> None:
-        self.telemetry: pd.DataFrame = df1
-        self.maintenance: pd.DataFrame = df2
-        self.errors: pd.DataFrame = df3
-        self.failures: pd.DataFrame = df5  # target
+    telemetry: pd.DataFrame
+    maintenance: pd.DataFrame
+    errors: pd.DataFrame
+    failures: pd.DataFrame  # target
 
     def df_prepared(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.fillna(0)
@@ -53,10 +49,8 @@ class Data_Preparation:
         return merged_failure_maint
 
 
+@dataclass(slots=True)
 class Load_Save:
-    def __init__(self) -> None:
-        pass
-
     def load_dataframe(self) -> pd.DataFrame:
         dbfile_dataframe = open("./pickle_files/data_preparation/data_set", "rb")
         data_set = pickle.load(dbfile_dataframe)
