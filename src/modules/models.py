@@ -200,19 +200,13 @@ class Save_Load_models:
 
 @dataclass(slots=True)
 class Anomaly_detection_isolationforest:
-    machine_name: int
     data: pd.DataFrame
     name: str
-    scaler_iso = None
+    machine_name: int
+    scaler_iso: object = None
 
     def __post_init__(self):
         self.data = self.data.query("machineID == @self.machine_name")
-
-    # def __init__(self, df: pd.DataFrame, feature_name: str, machine_name: int) -> None:
-    #     self.machine_name: int = machine_name
-    #     self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
-    #     self.name: str = feature_name
-    #     self.scaler_iso = None
 
     def isolationforest(self) -> None:
         data_index = self.data.set_index("datetime")
@@ -242,15 +236,16 @@ class Anomaly_detection_isolationforest:
         plt.show()
 
 
+@dataclass(slots=True)
 class Anomaly_detection_autoencoder:
-    def __init__(
-        self, df: pd.DataFrame, feature_name: str, machine_name: int, time_step: int
-    ) -> None:
-        self.machine_name: int = machine_name
-        self.data: pd.DataFrame = df.query("machineID == @self.machine_name")
-        self.name: str = feature_name
-        self.scaler_auto = None
-        self.time_step: int = time_step
+    data: pd.DataFrame
+    name: str
+    machine_name: int
+    time_step: int
+    scaler_auto: object = None
+
+    def __post_init__(self):
+        self.data = self.data.query("machineID == @self.machine_name")
 
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
@@ -259,7 +254,7 @@ class Anomaly_detection_autoencoder:
         x_train = self._create_sequences(data)
         return x_train
 
-    def result_autocendoer(self, model, x_train: np.array) -> tf:
+    def result_autocendoer(self, model: object, x_train: np.array) -> tf:
         # Calculate the reconstruction error for each data point
         reconstructions_deep = model.predict(x_train)
         mse = tf.reduce_mean(tf.square(x_train - reconstructions_deep), axis=[1, 2])
