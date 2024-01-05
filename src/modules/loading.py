@@ -1,12 +1,15 @@
 import pandas as pd
 import pickle
 
+from dataclasses import dataclass
+from typing import Tuple
 
+
+@dataclass(slots=True)
 class Loading_files:
-    def __init__(self) -> None:
-        pass
-
-    def load_save_df(self) -> pd.DataFrame:
+    def load_save_df(
+        self,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         df_telemetry = pd.read_csv("../src/data/PdM_telemetry.csv")
         df_machines = pd.read_csv("../src/data/PdM_machines.csv")
         df_failures = pd.read_csv("../src/data/PdM_failures.csv")
@@ -38,7 +41,9 @@ class Loading_files:
             df_maintenance,
         )
 
-    def load_db_file(self) -> pd.DataFrame:
+    def load_db_file(
+        self,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         dbfile_telemetry = open("./pickle_files/loading/telemetry", "rb")
         dbfile_machines = open("./pickle_files/loading/machines", "rb")
         dbfile_failures = open("./pickle_files/loading/failures", "rb")
