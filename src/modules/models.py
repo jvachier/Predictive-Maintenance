@@ -181,7 +181,7 @@ class Save_Load_models:
         dbfile_prediction.close()
         dbfile_prediction_proba.close()
 
-    def load_model_sklearn(self, name: str):
+    def load_model_sklearn(self, name: str) -> Tuple[object, np.array, np.array]:
         dbfile_model = open("./pickle_files/models/" + str(name), "rb")
         dbfile_prediction = open(
             "./pickle_files/models/" + str(name) + "_predictions", "rb"
@@ -203,7 +203,7 @@ class Anomaly_detection_isolationforest:
     data: pd.DataFrame
     name: str
     machine_name: int
-    scaler_iso: object = None
+    scaler_iso: StandardScaler = None
 
     def __post_init__(self):
         self.data = self.data.query("machineID == @self.machine_name")
@@ -242,7 +242,7 @@ class Anomaly_detection_autoencoder:
     name: str
     machine_name: int
     time_step: int
-    scaler_auto: object = None
+    scaler_auto: StandardScaler = None
 
     def __post_init__(self):
         self.data = self.data.query("machineID == @self.machine_name")
@@ -254,7 +254,7 @@ class Anomaly_detection_autoencoder:
         x_train = self._create_sequences(data)
         return x_train
 
-    def result_autocendoer(self, model: object, x_train: np.array) -> tf:
+    def result_autocendoer(self, model: object, x_train: np.array) -> tf.Tensor:
         # Calculate the reconstruction error for each data point
         reconstructions_deep = model.predict(x_train)
         mse = tf.reduce_mean(tf.square(x_train - reconstructions_deep), axis=[1, 2])
@@ -283,7 +283,7 @@ class Anomaly_detection_autoencoder:
             autoencoder_deep.save("./pickle_files/models/autoencoder.keras")
         return autoencoder_deep
 
-    def Anomaly(self, mse: tf) -> None:
+    def Anomaly(self, mse: tf.Tensor) -> None:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
         anomaly_deep_scores.index = self.data[(self.time_step - 1) :].index
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")

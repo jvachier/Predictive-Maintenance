@@ -6,11 +6,15 @@ import modules.data_preparation as data_preparation
 import modules.models as models
 import modules.loading as loading
 
-
-import sys
+from argparse import ArgumentParser
 
 
 def main() -> None:
+    parser = ArgumentParser()
+    parser.add_argument("--prediction", action="store_true")
+
+    args = parser.parse_args()
+
     print("Loading data\n")
 
     LOAD = loading.Loading_files()
@@ -48,9 +52,7 @@ def main() -> None:
     else:
         data_set_prepared = LOAD_DATA.load_dataframe()
 
-    prediction_on = sys.argv[1]
-
-    if prediction_on == "True":
+    if args.prediction:
         print("Models prediction\n")
         model = models.Predictions(data_set_prepared)
 
