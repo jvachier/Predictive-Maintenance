@@ -1,5 +1,5 @@
 import os.path
-import pandas as pd
+
 from keras.models import load_model
 
 import modules.data_preparation as data_preparation
