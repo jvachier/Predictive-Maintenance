@@ -25,4 +25,4 @@ jobs:
         pip install poetry
         poetry install
     - name: Run pylint
-      run: poetry run pylint -f actions src
+      run: poetry run pylint pylint_actions -f actions
