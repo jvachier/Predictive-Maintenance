@@ -21,8 +21,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install poetry
-        pip install tensorflow-io-gcs-filesystem
         poetry install
     - name: Run pylint
       run: poetry run pylint -f actions src
