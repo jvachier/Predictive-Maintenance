@@ -1,12 +1,13 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from dataclasses import dataclass
+from typing import Tuple
 
 import pickle
 import os.path
 
-from dataclasses import dataclass
-from typing import Tuple
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 from sklearn.metrics import (
     precision_recall_fscore_support,
@@ -15,11 +16,12 @@ from sklearn.metrics import (
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, learning_curve
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.linear_model import LogisticRegression
 
 from sklearn import metrics
 
+from skopt.searchcv import BayesSearchCV
 
 import tensorflow as tf
 from keras.layers import Input, Dense
@@ -32,39 +34,95 @@ class Predictions:
     data: pd.DataFrame
 
     def train_split(self) -> Tuple[np.array, np.array, list, list]:
-        X_train, X_test, y_train, y_test = train_test_split(
+        x_train, x_test, y_train, y_test = train_test_split(
             self.data.drop(columns=["datetime", "failure"]).values,
             self.data["failure"].values,
             test_size=0.20,
             stratify=self.data["failure"].values,
             random_state=1,
         )
-        return X_train, X_test, y_train, y_test
-
-    def model_lr(
-        self, X_train: np.array, y_train: list, X_test: np.array
-    ) -> Tuple[object, np.array, np.array]:
-        pipe_lr = make_pipeline(
-            StandardScaler(),
-            LogisticRegression(random_state=1, solver="lbfgs", max_iter=10000),
-        ).fit(X_train, y_train)
-        y_predic_lr = pipe_lr.predict(X_test)
-        y_predic_lr_proba = pipe_lr.predict_proba(X_test)
-        return pipe_lr, y_predic_lr, y_predic_lr_proba
+        return x_train, x_test, y_train, y_test
 
     def model_RF(
-        self, X_train: np.array, y_train: list, X_test: np.array
-    ) -> Tuple[object, np.array, np.array]:
-        clf_RFC = RandomForestClassifier(
-            n_estimators=25,
-            max_depth=10,
-            max_features="sqrt",
+        self,
+        estimateurs: int,
+        depth: int,
+        features: str,
+        jobs: int,
+    ) -> RandomForestClassifier:
+        return RandomForestClassifier(
+            n_estimators=estimateurs,
+            max_depth=depth,
+            max_features=features,
             random_state=1,
+            n_jobs=jobs,
+        )
+
+    def model_lr(
+        self,
+        solv: str,
+        iteration: int,
+    ) -> Pipeline:
+        return make_pipeline(
+            StandardScaler(),
+            LogisticRegression(random_state=1, solver=solv, max_iter=iteration),
+        )
+
+    def optimize_model_hyper_RF(
+        self,
+        model,
+        x_train: np.array,
+        y_train: list,
+    ) -> object:
+        params = {
+            "n_estimators": [10, 25, 50, 75],
+            "max_depth": np.arange(1, 9),
+            "criterion": ["gini", "entropy", "log_loss"],
+            "max_features": ["sqrt", "log2"],
+        }
+        search = BayesSearchCV(
+            estimator=model,
+            search_spaces=params,
             n_jobs=4,
-        ).fit(X_train, y_train)
-        y_pred_RFC = clf_RFC.predict(X_test)
-        y_pred_RFC_proba = clf_RFC.predict_proba(X_test)
-        return clf_RFC, y_pred_RFC, y_pred_RFC_proba
+            cv=3,
+            n_iter=50,
+            scoring="accuracy",
+            random_state=42,
+        )
+        np.int = int  # to solve the issue with np.int and BayesSearchCV
+        return search.fit(x_train, y_train)
+
+    def optimize_model_hyper_RF(
+        self,
+        model,
+        x_train: np.array,
+        y_train: list,
+    ) -> object:
+        params = {
+            "n_estimators": [10, 25, 50, 75],
+            "max_depth": np.arange(1, 9),
+            "criterion": ["gini", "entropy", "log_loss"],
+            "max_features": ["sqrt", "log2"],
+        }
+        search = BayesSearchCV(
+            estimator=model,
+            search_spaces=params,
+            n_jobs=4,
+            cv=3,
+            n_iter=50,
+            scoring="accuracy",
+            random_state=43,
+        )
+        np.int = int  # to solve the issue with np.int and BayesSearchCV
+        return search.fit(x_train, y_train)
+
+    def fit_model(
+        self,
+        model,
+        x_train: np.array,
+        y_train: list,
+    ) -> object:
+        return model.fit(x_train, y_train)
 
     def model_metrics(self, y_test: list, y_pred: list, name: str) -> None:
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred[:, 1])
@@ -72,11 +130,11 @@ class Predictions:
         print("AUC score " + str(name) + ":" + str(score))
 
     def roc_curve(
-        self, model1: object, model2: object, X_test: np.array, y_test: list
+        self, model1: object, model2: object, x_test: np.array, y_test: list
     ) -> None:
         plt.figure(1)
         models = [model1, model2]
-        x_tests = [X_test, X_test]
+        x_tests = [x_test, x_test]
         y_tests = [y_test, y_test]
 
         names = ["Logistic Rgression", "Random Forest"]
@@ -101,12 +159,12 @@ class Predictions:
         plt.show()
 
     def visualization_accuracy(
-        self, model: object, name: str, X_train, y_train: list
+        self, model: object, name: str, x_train, y_train: list
     ) -> None:
         plt.figure(3)
         train_sizes, train_scores, test_scores = learning_curve(
             estimator=model,
-            X=X_train,
+            X=x_train,
             y=y_train,
             train_sizes=np.linspace(0.1, 1.0, 10),
             cv=10,
@@ -250,8 +308,8 @@ class Anomaly_detection_autoencoder:
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
         self.data[self.name] = self.scaler_auto.fit_transform(self.data[[self.name]])
-        data = self.data.drop(columns=["datetime"], axis=1).values
-        x_train = self._create_sequences(data)
+        feature = self.data.drop(columns=["datetime"], axis=1).values
+        x_train = self._create_sequences(feature)
         return x_train
 
     def result_autocendoer(self, model: object, x_train: np.array) -> tf.Tensor:

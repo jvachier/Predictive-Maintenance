@@ -21,6 +21,7 @@
 *__pycache__/
 __pycache__/
 *.so
+*.pylintrc
 
 # Ignore specific file
 test.mp4
