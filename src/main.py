@@ -98,33 +98,10 @@ def main() -> None:
         model.model_metrics(y_test, y_pred_RFC_proba, "Random Forest")
 
         model.roc_curve(pipe_lr_fit, clf_RFC_fit, X_test, y_test)
-        model.visualization_test(y_test, y_pred_RFC, "RF Test")
+        model.visualization_prediction(y_test, y_pred_RFC, "RF Test")
 
         model.visualization_accuracy(pipe_lr, "Logistic Regression", X_train, y_train)
         model.visualization_accuracy(clf_RFC, "Random Forest", X_train, y_train)
-
-        #     pipe_lr, y_predic_lr, y_predic_lr_proba = model.model_lr(
-        #         X_train, y_train, X_test
-        #     )
-        #     clf_RFC, y_pred_RFC, y_pred_RFC_proba = model.model_RF(
-        #         X_train, y_train, X_test
-        #     )
-        #     save_model.save_model_sklearn("lr", pipe_lr, y_predic_lr, y_predic_lr_proba)
-        #     save_model.save_model_sklearn("rf", clf_RFC, y_pred_RFC, y_pred_RFC_proba)
-        # else:
-        #     pipe_lr, y_predic_lr, y_predic_lr_proba = save_model.load_model_sklearn(
-        #         "lr"
-        #     )
-        #     clf_RFC, y_pred_RFC, y_pred_RFC_proba = save_model.load_model_sklearn("rf")
-
-        # model.model_metrics(y_test, y_predic_lr_proba, "Logictic Regression")
-        # model.model_metrics(y_test, y_pred_RFC_proba, "Random Forest")
-
-        # model.roc_curve(pipe_lr, clf_RFC, X_test, y_test)
-        # model.visualization_prediction(y_test, y_pred_RFC, "RF")
-
-        # model.visualization_accuracy(pipe_lr, "Logistic Regression", X_train, y_train)
-        # model.visualization_accuracy(clf_RFC, "Random Forest", X_train, y_train)
     else:
         print("\n")
         print("Models Anomaly Detection\n")

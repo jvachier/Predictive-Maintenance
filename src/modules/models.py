@@ -15,7 +15,7 @@ from sklearn.metrics import (
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, learning_curve
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.linear_model import LogisticRegression
 
 from sklearn import metrics
@@ -74,7 +74,7 @@ class Predictions:
         y_train: list,
     ) -> object:
         params = {
-            "n_estimators": [100, 200, 300, 400],
+            "n_estimators": [10, 25, 50, 75],
             "max_depth": np.arange(1, 9),
             "criterion": ["gini", "entropy", "log_loss"],
             "max_features": ["sqrt", "log2"],
@@ -83,10 +83,34 @@ class Predictions:
             estimator=model,
             search_spaces=params,
             n_jobs=4,
-            cv=5,
-            n_iter=30,
+            cv=3,
+            n_iter=50,
             scoring="accuracy",
             random_state=42,
+        )
+        np.int = int  # to solve the issue with np.int and BayesSearchCV
+        return search.fit(X_train, y_train)
+
+    def optimize_model_hyper_RF(
+        self,
+        model,
+        X_train: np.array,
+        y_train: list,
+    ) -> object:
+        params = {
+            "n_estimators": [10, 25, 50, 75],
+            "max_depth": np.arange(1, 9),
+            "criterion": ["gini", "entropy", "log_loss"],
+            "max_features": ["sqrt", "log2"],
+        }
+        search = BayesSearchCV(
+            estimator=model,
+            search_spaces=params,
+            n_jobs=4,
+            cv=3,
+            n_iter=50,
+            scoring="accuracy",
+            random_state=43,
         )
         np.int = int  # to solve the issue with np.int and BayesSearchCV
         return search.fit(X_train, y_train)
@@ -98,31 +122,6 @@ class Predictions:
         y_train: list,
     ) -> object:
         return model.fit(X_train, y_train)
-
-    # def model_lr(
-    #     self, X_train: np.array, y_train: list, X_test: np.array
-    # ) -> Tuple[object, np.array, np.array]:
-    #     pipe_lr = make_pipeline(
-    #         StandardScaler(),
-    #         LogisticRegression(random_state=1, solver="lbfgs", max_iter=10000),
-    #     ).fit(X_train, y_train)
-    #     y_predic_lr = pipe_lr.predict(X_test)
-    #     y_predic_lr_proba = pipe_lr.predict_proba(X_test)
-    #     return pipe_lr, y_predic_lr, y_predic_lr_proba
-
-    # def model_RF(
-    #     self, X_train: np.array, y_train: list, X_test: np.array
-    # ) -> Tuple[object, np.array, np.array]:
-    #     clf_RFC = RandomForestClassifier(
-    #         n_estimators=25,
-    #         max_depth=10,
-    #         max_features="sqrt",
-    #         random_state=1,
-    #         n_jobs=4,
-    #     ).fit(X_train, y_train)
-    #     y_pred_RFC = clf_RFC.predict(X_test)
-    #     y_pred_RFC_proba = clf_RFC.predict_proba(X_test)
-    #     return clf_RFC, y_pred_RFC, y_pred_RFC_proba
 
     def model_metrics(self, y_test: list, y_pred: list, name: str) -> None:
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred[:, 1])
