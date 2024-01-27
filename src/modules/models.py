@@ -307,8 +307,8 @@ class Anomaly_detection_autoencoder:
     def data_to_feed_autoencoder(self) -> np.array:
         self.scaler_auto = StandardScaler()
         self.data[self.name] = self.scaler_auto.fit_transform(self.data[[self.name]])
-        data = self.data.drop(columns=["datetime"], axis=1).values
-        x_train = self._create_sequences(data)
+        feature = self.data.drop(columns=["datetime"], axis=1).values
+        x_train = self._create_sequences(feature)
         return x_train
 
     def result_autocendoer(self, model: object, x_train: np.array) -> tf.Tensor:
