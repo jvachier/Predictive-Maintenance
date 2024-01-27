@@ -65,11 +65,11 @@ def main() -> None:
         save_model = models.Save_Load_models()
 
         x_train, x_test, y_train, y_test = model.train_split()
-        clf_rfc = model.model_RF(25, 10, "sqrt", 4)
+        clf_rfc = model.model_rf(25, 10, "sqrt", 4)
         pipe_lr = model.model_lr("lbfgs", 10000)
 
         if os.path.isfile("./pickle_files/models/lr") is False:
-            clf_rfc_fit = model.optimize_model_hyper_RF(clf_rfc, x_train, y_train)
+            clf_rfc_fit = model.optimize_model_hyper_rf(clf_rfc, x_train, y_train)
             pipe_lr_fit = model.fit_model(pipe_lr, x_train, y_train)
 
             save_model.save_model_sklearn(
@@ -115,13 +115,13 @@ def main() -> None:
         anomaly_isolation.visulaization_isolationforest()
         x_train = anomaly_autoencoder.data_to_feed_autoencoder()
         if os.path.isfile("./pickle_files/models/autoencoder.keras") is False:
-            autoencoder = anomaly_autoencoder.AutoEncoder(x_train)
+            autoencoder = anomaly_autoencoder.autoencoder(x_train)
             mse = anomaly_autoencoder.result_autocendoer(autoencoder, x_train)
             anomaly_autoencoder.Anomaly(mse)
         else:
             autoencoder = load_model("./pickle_files/models/autoencoder.keras")
             mse = anomaly_autoencoder.result_autocendoer(autoencoder, x_train)
-            anomaly_autoencoder.Anomaly(mse)
+            anomaly_autoencoder.anomaly(mse)
 
 
 if __name__ == "__main__":
