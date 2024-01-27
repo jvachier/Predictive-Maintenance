@@ -2,14 +2,20 @@ import os.path
 
 from keras.models import load_model
 
-import modules.data_preparation as data_preparation
-import modules.models as models
-import modules.loading as loading
+from modules import data_preparation
+from modules import models
+from modules import loading
 
 from argparse import ArgumentParser
 
 
 def main() -> None:
+    """
+    Main function including:
+        - Loading data (loading.py)
+        - Data Preparation (data_preparation.py)
+        - Models & Visualization (models.py)
+    """
     parser = ArgumentParser()
     parser.add_argument("--prediction", action="store_true")
 
@@ -17,7 +23,7 @@ def main() -> None:
 
     print("Loading data\n")
 
-    LOAD = loading.Loading_files()
+    load = loading.Loading_files()
 
     if os.path.isfile("./pickle_files/loading/telemetry") is False:
         (
@@ -26,7 +32,7 @@ def main() -> None:
             df_failures,
             df_errors,
             df_maintenance,
-        ) = LOAD.load_save_df()
+        ) = load.load_save_df()
     else:
         (
             df_telemetry,
@@ -34,23 +40,23 @@ def main() -> None:
             df_failures,
             df_errors,
             df_maintenance,
-        ) = LOAD.load_db_file()
+        ) = load.load_db_file()
 
-    DATA = data_preparation.Data_Preparation(
+    data = data_preparation.Data_Preparation(
         df_telemetry,
         df_maintenance,
         df_errors,
         df_failures,
     )
-    LOAD_DATA = data_preparation.Load_Save()
+    load_data = data_preparation.Load_Save()
 
     if os.path.isfile("./pickle_files/data_preparation/data_set") is False:
-        DATA.date_to_time()
-        data_set = DATA.merge_df()
-        data_set_prepared = DATA.df_prepared(data_set)
-        LOAD_DATA.save_dataframe(data_set_prepared)
+        data.date_to_time()
+        data_set = data.merge_df()
+        data_set_prepared = data.df_prepared(data_set)
+        load_data.save_dataframe(data_set_prepared)
     else:
-        data_set_prepared = LOAD_DATA.load_dataframe()
+        data_set_prepared = load_data.load_dataframe()
 
     if args.prediction:
         print("Models prediction\n")
@@ -58,50 +64,42 @@ def main() -> None:
 
         save_model = models.Save_Load_models()
 
-        X_train, X_test, y_train, y_test = model.train_split()
+        x_train, x_test, y_train, y_test = model.train_split()
+        clf_rfc = model.model_RF(25, 10, "sqrt", 4)
+        pipe_lr = model.model_lr("lbfgs", 10000)
 
         if os.path.isfile("./pickle_files/models/lr") is False:
-            clf_RFC = model.model_RF(25, 10, "sqrt", 4)
-            pipe_lr = model.model_lr("lbfgs", 10000)
-
-            clf_RFC_fit = model.optimize_model_hyper_RF(clf_RFC, X_train, y_train)
-
-            pipe_lr_fit = model.fit_model(pipe_lr, X_train, y_train)
-
-            y_predic_lr = pipe_lr_fit.predict(X_test)
-            y_predic_lr_proba = pipe_lr_fit.predict_proba(X_test)
-
-            y_pred_RFC = clf_RFC_fit.predict(X_test)
-            y_pred_RFC_proba = clf_RFC_fit.predict_proba(X_test)
+            clf_rfc_fit = model.optimize_model_hyper_RF(clf_rfc, x_train, y_train)
+            pipe_lr_fit = model.fit_model(pipe_lr, x_train, y_train)
 
             save_model.save_model_sklearn(
                 "lr",
                 pipe_lr_fit,
-                pipe_lr_fit.predict(X_test),
-                pipe_lr_fit.predict_proba(X_test),
+                pipe_lr_fit.predict(x_test),
+                pipe_lr_fit.predict_proba(x_test),
             )
             save_model.save_model_sklearn(
                 "rf",
-                clf_RFC_fit,
-                clf_RFC_fit.predict(X_test),
-                clf_RFC_fit.predict_proba(X_test),
+                clf_rfc_fit,
+                clf_rfc_fit.predict(x_test),
+                clf_rfc_fit.predict_proba(x_test),
             )
         else:
             pipe_lr_fit, y_predic_lr, y_predic_lr_proba = save_model.load_model_sklearn(
                 "lr"
             )
-            clf_RFC_fit, y_pred_RFC, y_pred_RFC_proba = save_model.load_model_sklearn(
+            clf_rfc_fit, y_pred_rfc, y_pred_rfc_proba = save_model.load_model_sklearn(
                 "rf"
             )
 
         model.model_metrics(y_test, y_predic_lr_proba, "Logictic Regression")
-        model.model_metrics(y_test, y_pred_RFC_proba, "Random Forest")
+        model.model_metrics(y_test, y_pred_rfc_proba, "Random Forest")
 
-        model.roc_curve(pipe_lr_fit, clf_RFC_fit, X_test, y_test)
-        model.visualization_prediction(y_test, y_pred_RFC, "RF Test")
+        model.roc_curve(pipe_lr_fit, clf_rfc_fit, x_test, y_test)
+        model.visualization_prediction(y_test, y_pred_rfc, "RF Test")
 
-        model.visualization_accuracy(pipe_lr, "Logistic Regression", X_train, y_train)
-        model.visualization_accuracy(clf_RFC, "Random Forest", X_train, y_train)
+        model.visualization_accuracy(pipe_lr, "Logistic Regression", x_train, y_train)
+        model.visualization_accuracy(clf_rfc, "Random Forest", x_train, y_train)
     else:
         print("\n")
         print("Models Anomaly Detection\n")
