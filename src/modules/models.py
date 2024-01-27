@@ -1,12 +1,13 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from dataclasses import dataclass
+from typing import Tuple
 
 import pickle
 import os.path
 
-from dataclasses import dataclass
-from typing import Tuple
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 from sklearn.metrics import (
     precision_recall_fscore_support,
@@ -33,14 +34,14 @@ class Predictions:
     data: pd.DataFrame
 
     def train_split(self) -> Tuple[np.array, np.array, list, list]:
-        X_train, X_test, y_train, y_test = train_test_split(
+        x_train, x_test, y_train, y_test = train_test_split(
             self.data.drop(columns=["datetime", "failure"]).values,
             self.data["failure"].values,
             test_size=0.20,
             stratify=self.data["failure"].values,
             random_state=1,
         )
-        return X_train, X_test, y_train, y_test
+        return x_train, x_test, y_train, y_test
 
     def model_RF(
         self,
@@ -70,7 +71,7 @@ class Predictions:
     def optimize_model_hyper_RF(
         self,
         model,
-        X_train: np.array,
+        x_train: np.array,
         y_train: list,
     ) -> object:
         params = {
@@ -89,12 +90,12 @@ class Predictions:
             random_state=42,
         )
         np.int = int  # to solve the issue with np.int and BayesSearchCV
-        return search.fit(X_train, y_train)
+        return search.fit(x_train, y_train)
 
     def optimize_model_hyper_RF(
         self,
         model,
-        X_train: np.array,
+        x_train: np.array,
         y_train: list,
     ) -> object:
         params = {
@@ -113,15 +114,15 @@ class Predictions:
             random_state=43,
         )
         np.int = int  # to solve the issue with np.int and BayesSearchCV
-        return search.fit(X_train, y_train)
+        return search.fit(x_train, y_train)
 
     def fit_model(
         self,
         model,
-        X_train: np.array,
+        x_train: np.array,
         y_train: list,
     ) -> object:
-        return model.fit(X_train, y_train)
+        return model.fit(x_train, y_train)
 
     def model_metrics(self, y_test: list, y_pred: list, name: str) -> None:
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred[:, 1])
@@ -129,11 +130,11 @@ class Predictions:
         print("AUC score " + str(name) + ":" + str(score))
 
     def roc_curve(
-        self, model1: object, model2: object, X_test: np.array, y_test: list
+        self, model1: object, model2: object, x_test: np.array, y_test: list
     ) -> None:
         plt.figure(1)
         models = [model1, model2]
-        x_tests = [X_test, X_test]
+        x_tests = [x_test, x_test]
         y_tests = [y_test, y_test]
 
         names = ["Logistic Rgression", "Random Forest"]
@@ -158,12 +159,12 @@ class Predictions:
         plt.show()
 
     def visualization_accuracy(
-        self, model: object, name: str, X_train, y_train: list
+        self, model: object, name: str, x_train, y_train: list
     ) -> None:
         plt.figure(3)
         train_sizes, train_scores, test_scores = learning_curve(
             estimator=model,
-            X=X_train,
+            X=x_train,
             y=y_train,
             train_sizes=np.linspace(0.1, 1.0, 10),
             cv=10,
