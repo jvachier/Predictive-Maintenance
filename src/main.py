@@ -1,12 +1,10 @@
 import os.path
-
+from argparse import ArgumentParser
 from keras.models import load_model
 
 from modules import data_preparation
 from modules import models
 from modules import loading
-
-from argparse import ArgumentParser
 
 
 def main() -> None:
@@ -117,7 +115,7 @@ def main() -> None:
         if os.path.isfile("./pickle_files/models/autoencoder.keras") is False:
             autoencoder = anomaly_autoencoder.autoencoder(x_train)
             mse = anomaly_autoencoder.result_autocendoer(autoencoder, x_train)
-            anomaly_autoencoder.Anomaly(mse)
+            anomaly_autoencoder.anomaly(mse)
         else:
             autoencoder = load_model("./pickle_files/models/autoencoder.keras")
             mse = anomaly_autoencoder.result_autocendoer(autoencoder, x_train)
