@@ -2,9 +2,9 @@ import os.path
 from argparse import ArgumentParser
 from keras.models import load_model
 
-from modules import data_preparation
-from modules import models
-from modules import loading
+from src.modules import data_preparation
+from src.modules import models
+from src.modules import loading
 
 
 def main() -> None:
