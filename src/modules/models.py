@@ -43,7 +43,7 @@ class Predictions:
         )
         return x_train, x_test, y_train, y_test
 
-    def model_RF(
+    def model_rf(
         self,
         estimateurs: int,
         depth: int,
@@ -68,7 +68,7 @@ class Predictions:
             LogisticRegression(random_state=1, solver=solv, max_iter=iteration),
         )
 
-    def optimize_model_hyper_RF(
+    def optimize_model_hyper_rf(
         self,
         model,
         x_train: np.array,
@@ -88,30 +88,6 @@ class Predictions:
             n_iter=50,
             scoring="accuracy",
             random_state=42,
-        )
-        np.int = int  # to solve the issue with np.int and BayesSearchCV
-        return search.fit(x_train, y_train)
-
-    def optimize_model_hyper_RF(
-        self,
-        model,
-        x_train: np.array,
-        y_train: list,
-    ) -> object:
-        params = {
-            "n_estimators": [10, 25, 50, 75],
-            "max_depth": np.arange(1, 9),
-            "criterion": ["gini", "entropy", "log_loss"],
-            "max_features": ["sqrt", "log2"],
-        }
-        search = BayesSearchCV(
-            estimator=model,
-            search_spaces=params,
-            n_jobs=4,
-            cv=3,
-            n_iter=50,
-            scoring="accuracy",
-            random_state=43,
         )
         np.int = int  # to solve the issue with np.int and BayesSearchCV
         return search.fit(x_train, y_train)
@@ -141,7 +117,7 @@ class Predictions:
 
         for i, j in enumerate(models):
             ax = plt.gca()
-            clf_disp = RocCurveDisplay.from_estimator(
+            RocCurveDisplay.from_estimator(
                 j, x_tests[i], y_tests[i], ax=ax, name=names[i], alpha=0.8
             )
         plt.savefig("./figures/roc_curves.png")
@@ -225,34 +201,29 @@ class Save_Load_models:
     def save_model_sklearn(
         self, name: str, model: object, prediction: np.array, prediction_proba: np.array
     ) -> None:
-        dbfile_model = open("./pickle_files/models/" + str(name), "ab")
-        dbfile_prediction = open(
+        with open("./pickle_files/models/" + str(name), "ab") as dbfile_model:
+            pickle.dump(model, dbfile_model)
+        with open(
             "./pickle_files/models/" + str(name) + "_predictions", "ab"
-        )
-        dbfile_prediction_proba = open(
+        ) as dbfile_prediction:
+            pickle.dump(prediction, dbfile_prediction)
+
+        with open(
             "./pickle_files/models/" + str(name) + "_predictions_proba", "ab"
-        )
-        pickle.dump(model, dbfile_model)
-        pickle.dump(prediction, dbfile_prediction)
-        pickle.dump(prediction_proba, dbfile_prediction_proba)
-        dbfile_model.close()
-        dbfile_prediction.close()
-        dbfile_prediction_proba.close()
+        ) as dbfile_prediction_proba:
+            pickle.dump(prediction_proba, dbfile_prediction_proba)
 
     def load_model_sklearn(self, name: str) -> Tuple[object, np.array, np.array]:
-        dbfile_model = open("./pickle_files/models/" + str(name), "rb")
-        dbfile_prediction = open(
+        with open("./pickle_files/models/" + str(name), "rb") as dbfile_model:
+            model_loaded = pickle.load(dbfile_model)
+        with open(
             "./pickle_files/models/" + str(name) + "_predictions", "rb"
-        )
-        dbfile_prediction_proba = open(
+        ) as dbfile_prediction:
+            predictions_loaded = pickle.load(dbfile_prediction)
+        with open(
             "./pickle_files/models/" + str(name) + "_predictions_proba", "rb"
-        )
-        model_loaded = pickle.load(dbfile_model)
-        predictions_loaded = pickle.load(dbfile_prediction)
-        prediction_proba_loaded = pickle.load(dbfile_prediction_proba)
-        dbfile_model.close()
-        dbfile_prediction.close()
-        dbfile_prediction_proba.close()
+        ) as dbfile_prediction_proba:
+            prediction_proba_loaded = pickle.load(dbfile_prediction_proba)
         return model_loaded, predictions_loaded, prediction_proba_loaded
 
 
@@ -318,7 +289,7 @@ class Anomaly_detection_autoencoder:
         mse = tf.reduce_mean(tf.square(x_train - reconstructions_deep), axis=[1, 2])
         return mse
 
-    def AutoEncoder(self, x_train: np.array):
+    def autoencoder(self, x_train: np.array):
         input_layer = Input(shape=(x_train.shape[1], x_train.shape[2]))
         encoded = Dense(128, activation="relu")(input_layer)
         encoded = Dense(64, activation="relu")(encoded)
@@ -341,7 +312,7 @@ class Anomaly_detection_autoencoder:
             autoencoder_deep.save("./pickle_files/models/autoencoder.keras")
         return autoencoder_deep
 
-    def Anomaly(self, mse: tf.Tensor) -> None:
+    def anomaly(self, mse: tf.Tensor) -> None:
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
         anomaly_deep_scores.index = self.data[(self.time_step - 1) :].index
         anomaly_deep_scores = pd.Series(mse.numpy(), name="anomaly_scores")
@@ -349,11 +320,6 @@ class Anomaly_detection_autoencoder:
 
         threshold_deep = anomaly_deep_scores.quantile(0.95)
         anomalous_deep = anomaly_deep_scores > threshold_deep
-        binary_labels_deep = anomalous_deep.astype(int)
-        precision, recall, f1_score, _ = precision_recall_fscore_support(
-            binary_labels_deep,
-            anomalous_deep,
-        )
 
         plt.figure(figsize=(16, 8))
         plt.plot(

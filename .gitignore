@@ -1,3 +1,6 @@
+# Allow
+!requirements.txt
+
 # Ignore Mac system files
 .DS_store
 .dSYM
@@ -36,3 +39,4 @@ test.mp4
 
 # Ignore all json file
 *.json
+
