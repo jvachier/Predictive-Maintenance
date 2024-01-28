@@ -13,7 +13,7 @@
 *.html
 
 # Ignore all text files
-*.txt
+#*.txt
 *.bin
 *.h5
 *.keras
