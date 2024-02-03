@@ -7,4 +7,3 @@ datetime == 5.4
 statsmodels == 0.14.1
 pylint == 3.0.3
 scikit-optimize == 0.9.0
-poetry == 1.7.1
