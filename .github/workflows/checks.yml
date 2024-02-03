@@ -22,9 +22,9 @@ jobs:
     - name: Install dependencies
       run: |
         make install
-    - name: Poetry
-      run: |
-        make install poetry
+    # - name: Poetry
+    #   run: |
+    #     make install poetry
     - name: Black
       run: |
         make black
