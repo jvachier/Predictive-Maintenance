@@ -2,10 +2,10 @@ install:
 	python -m pip install --upgrade pip &&\
 		pip install -r requirements.txt
 
-install poetry:
-	python -m pip install --upgrade pip &&\
-		pip install poetry==1.7.1 && \
-		poetry install
+# install poetry:
+# 	python -m pip install --upgrade pip &&\
+# 		pip install poetry==1.7.1 && \
+# 		poetry install
 
 lint: 
 	pylint --disable=R,C src/
