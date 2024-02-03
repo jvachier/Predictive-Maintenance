@@ -24,9 +24,9 @@ from sklearn import metrics
 from skopt.searchcv import BayesSearchCV
 
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Dense
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers.legacy import Adam
+from keras.layers import Input, Dense
+from keras.models import Model
+from keras.optimizers.legacy import Adam
 
 
 @dataclass(slots=True)
