@@ -34,6 +34,17 @@ class Predictions:
     data: pd.DataFrame
 
     def train_split(self) -> Tuple[np.array, np.array, list, list]:
+        '''
+        Build train/test data.
+
+        Return:
+            - Tuple:   
+                - x_train: np.array 
+                - x_test: np.array
+                - y_train: list 
+                - y_test: list
+
+        '''
         x_train, x_test, y_train, y_test = train_test_split(
             self.data.drop(columns=["datetime", "failure"]).values,
             self.data["failure"].values,
@@ -50,6 +61,19 @@ class Predictions:
         features: str,
         jobs: int,
     ) -> RandomForestClassifier:
+        '''
+        Build RandomForestClassifier model.
+
+        Input:
+            - estimateurs: int
+            - depth: int
+            - features: str
+            - jobs: int
+
+        Return:
+            - RandomForestClassifier
+
+        '''
         return RandomForestClassifier(
             n_estimators=estimateurs,
             max_depth=depth,
@@ -63,6 +87,17 @@ class Predictions:
         solv: str,
         iteration: int,
     ) -> Pipeline:
+        '''
+        Build Pipeline model using StandScaler and LogisticRegression.
+
+        Input:
+            - solv: str
+            - iteration: int
+
+        Return:
+            - Pipeline
+
+        '''
         return make_pipeline(
             StandardScaler(),
             LogisticRegression(random_state=1, solver=solv, max_iter=iteration),
@@ -70,10 +105,22 @@ class Predictions:
 
     def optimize_model_hyper_rf(
         self,
-        model,
+        model: RandomForestClassifier,
         x_train: np.array,
         y_train: list,
     ) -> object:
+        '''
+        Optimize hyperparameters of the RandomForestClassifier model using BayesSearchCV.
+
+        Input:
+            - model: RandomForestClassifier
+            - x_train: np.array
+            - y_train: list
+
+        Return:
+            - object
+
+        '''
         params = {
             "n_estimators": [10, 25, 50, 75],
             "max_depth": np.arange(1, 9),
@@ -98,9 +145,30 @@ class Predictions:
         x_train: np.array,
         y_train: list,
     ) -> object:
+        '''
+        Fit model.
+
+        Input:
+            - model
+            - x_train: np.array
+            - y_train: list
+
+        Return:
+            - object
+
+        '''
         return model.fit(x_train, y_train)
 
     def model_metrics(self, y_test: list, y_pred: list, name: str) -> None:
+        '''
+        ROC AUC metric.
+
+        Input:
+            - y_test: list
+            - y_pred: list
+            - name: str
+
+        '''
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred[:, 1])
         score = metrics.auc(fpr, tpr)
         print("AUC score " + str(name) + ":" + str(score))
@@ -108,6 +176,16 @@ class Predictions:
     def roc_curve(
         self, model1: object, model2: object, x_test: np.array, y_test: list
     ) -> None:
+        '''
+        Plot ROC AUC curves to compare both model LR and RF.
+
+        Input:
+            - model1: object
+            - model2: object
+            - x_test: np.array
+            - y_test: list
+
+        '''
         plt.figure(1)
         models = [model1, model2]
         x_tests = [x_test, x_test]
@@ -124,6 +202,15 @@ class Predictions:
         plt.show()
 
     def visualization_prediction(self, y_test: list, y_pred: list, name: str) -> None:
+        '''
+        Plot the prediction.
+
+        Input:
+            - y_test: list
+            - y_pred: list
+            - name: str
+
+        '''
         plt.figure(2)
         plt.plot(y_test, "+", label="Real")
         plt.plot(y_pred, ".", label="Predicted")
@@ -137,6 +224,16 @@ class Predictions:
     def visualization_accuracy(
         self, model: object, name: str, x_train, y_train: list
     ) -> None:
+        '''
+        Plot the accuracy.
+
+        Input:
+            - model: object
+            - name: str
+            - x_train: np.array
+            - y_train: list
+
+        '''
         plt.figure(3)
         train_sizes, train_scores, test_scores = learning_curve(
             estimator=model,
