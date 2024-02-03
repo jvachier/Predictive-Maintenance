@@ -4,6 +4,7 @@ version = "1.2.2"
 description = ""
 authors = ["Jeremy Vachier"]
 readme = "README.md"
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
@@ -12,11 +13,12 @@ pandas = "^2.1.4"
 matplotlib = "^3.8.2"
 scikit-learn = "^1.3.2"
 tensorflow-io-gcs-filesystem = "<0.35.0"
-tensorflow-macos = "^2.15.0"
+tensorflow-macos = ">=2.15.0"
 datetime = "^5.4"
 statsmodels = "^0.14.1"
 pylint = "^3.0.3"
 scikit-optimize = "^0.9.0"
+black = "^24.1.1"
 
 [build-system]
 requires = ["poetry-core"]
