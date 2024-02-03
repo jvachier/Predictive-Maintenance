@@ -22,6 +22,9 @@ jobs:
     - name: Install dependencies
       run: |
         make install
-    # - name: Lint
-    #   run: |
-    #     make lint
+    - name: Poetry
+      run: |
+        make install poetry
+    - name: Black
+      run: |
+        make black
