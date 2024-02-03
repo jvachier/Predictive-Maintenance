@@ -1,6 +1,6 @@
 import os.path
 from argparse import ArgumentParser
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 
 from src.modules import data_preparation
 from src.modules import models
