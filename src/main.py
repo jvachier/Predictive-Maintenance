@@ -59,7 +59,7 @@ def main() -> None:
         print("Models prediction\n")
         model = models.Predictions(data_set_prepared)
 
-        save_model = models.Save_Load_models()
+        save_model = models.SaveLoadmodels()
 
         x_train, x_test, y_train, y_test = model.train_split()
         clf_rfc = model.model_rf(25, 10, "sqrt", 4)
@@ -101,10 +101,10 @@ def main() -> None:
         print("\n")
         print("Models Anomaly Detection\n")
 
-        anomaly_isolation = models.Anomaly_detection_isolationforest(
+        anomaly_isolation = models.AnomalyDetectionIsolationforest(
             df_telemetry, "pressure", 1
         )
-        anomaly_autoencoder = models.Anomaly_detection_autoencoder(
+        anomaly_autoencoder = models.AnomalyDetectionAutoencoder(
             df_telemetry, "pressure", 1, 5
         )
 
