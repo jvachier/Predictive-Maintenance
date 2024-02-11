@@ -1,10 +1,9 @@
 import os.path
 from argparse import ArgumentParser
+
 from keras.models import load_model
 
-from src.modules import data_preparation
-from src.modules import models
-from src.modules import loading
+from src.modules import data_preparation, loading, models
 
 
 def main() -> None:
@@ -21,7 +20,7 @@ def main() -> None:
 
     print("Loading data\n")
 
-    load = loading.Loading_files()
+    load = loading.LoadingFiles()
 
     if os.path.isfile("./pickle_files/loading/telemetry") is False:
         (
@@ -40,13 +39,13 @@ def main() -> None:
             df_maintenance,
         ) = load.load_db_file()
 
-    data = data_preparation.Data_Preparation(
+    data = data_preparation.DataPreparation(
         df_telemetry,
         df_maintenance,
         df_errors,
         df_failures,
     )
-    load_data = data_preparation.Load_Save()
+    load_data = data_preparation.LoadSave()
 
     if os.path.isfile("./pickle_files/data_preparation/data_set") is False:
         data.date_to_time()
@@ -60,7 +59,7 @@ def main() -> None:
         print("Models prediction\n")
         model = models.Predictions(data_set_prepared)
 
-        save_model = models.Save_Load_models()
+        save_model = models.SaveLoadmodels()
 
         x_train, x_test, y_train, y_test = model.train_split()
         clf_rfc = model.model_rf(25, 10, "sqrt", 4)
@@ -102,10 +101,10 @@ def main() -> None:
         print("\n")
         print("Models Anomaly Detection\n")
 
-        anomaly_isolation = models.Anomaly_detection_isolationforest(
+        anomaly_isolation = models.AnomalyDetectionIsolationforest(
             df_telemetry, "pressure", 1
         )
-        anomaly_autoencoder = models.Anomaly_detection_autoencoder(
+        anomaly_autoencoder = models.AnomalyDetectionAutoencoder(
             df_telemetry, "pressure", 1, 5
         )
 

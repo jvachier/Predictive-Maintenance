@@ -1,11 +1,12 @@
-from typing import Tuple
-from dataclasses import dataclass
 import pickle
+from dataclasses import dataclass
+from typing import Tuple
+
 import pandas as pd
 
 
 @dataclass(slots=True)
-class Loading_files:
+class LoadingFiles:
     """
     Class to load and save required data into a pickle format
     """

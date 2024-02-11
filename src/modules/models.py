@@ -1,32 +1,25 @@
+import os.path
+import pickle
 from dataclasses import dataclass
 from typing import Tuple
 
-import pickle
-import os.path
-
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-
-
-from sklearn.metrics import (
-    precision_recall_fscore_support,
-    RocCurveDisplay,
-)
-from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, learning_curve
-from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.linear_model import LogisticRegression
-
-from sklearn import metrics
-
-from skopt.searchcv import BayesSearchCV
-
+import numpy as np
+import pandas as pd
 import tensorflow as tf
-from keras.layers import Input, Dense
+from keras.layers import Dense, Input
 from keras.models import Model
 from keras.optimizers.legacy import Adam
+from sklearn import metrics
+from sklearn.ensemble import IsolationForest, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    RocCurveDisplay,
+)
+from sklearn.model_selection import learning_curve, train_test_split
+from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.preprocessing import StandardScaler
+from skopt.searchcv import BayesSearchCV
 
 
 @dataclass(slots=True)
@@ -294,7 +287,7 @@ class Predictions:
 
 
 @dataclass(slots=True)
-class Save_Load_models:
+class SaveLoadmodels:
     def save_model_sklearn(
         self, name: str, model: object, prediction: np.array, prediction_proba: np.array
     ) -> None:
@@ -325,7 +318,7 @@ class Save_Load_models:
 
 
 @dataclass(slots=True)
-class Anomaly_detection_isolationforest:
+class AnomalyDetectionIsolationforest:
     data: pd.DataFrame
     name: str
     machine_name: int
@@ -363,7 +356,7 @@ class Anomaly_detection_isolationforest:
 
 
 @dataclass(slots=True)
-class Anomaly_detection_autoencoder:
+class AnomalyDetectionAutoencoder:
     data: pd.DataFrame
     name: str
     machine_name: int
