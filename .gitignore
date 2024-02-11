@@ -17,17 +17,22 @@
 *.bin
 *.h5
 *.keras
-*data/
-*videos/
-*pickle_files/
 *.pyc
-*__pycache__/
-__pycache__/
 *.so
 *.pylintrc
 
+*data/
+*videos/
+*pickle_files/
+*predictions/
+
+*__pycache__/
+__pycache__/
+*.ruff_cache/
+
+
 # Ignore specific file
-test.mp4
+*.mp4
 
 # Ignore all executable files
 *.o
@@ -39,4 +44,3 @@ test.mp4
 
 # Ignore all json file
 *.json
-

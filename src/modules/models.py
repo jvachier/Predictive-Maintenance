@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 
 
 from sklearn.metrics import (
-    precision_recall_fscore_support,
     RocCurveDisplay,
 )
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
