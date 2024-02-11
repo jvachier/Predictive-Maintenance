@@ -1,10 +1,11 @@
-from dataclasses import dataclass
 import pickle
+from dataclasses import dataclass
+
 import pandas as pd
 
 
 @dataclass(slots=True)
-class Data_Preparation:
+class DataPreparation:
     """
     Class to prepare data to be ingested by the model
     Input:
@@ -84,7 +85,7 @@ class Data_Preparation:
 
 
 @dataclass(slots=True)
-class Load_Save:
+class LoadSave:
     """
     Class to load and save the prepared data into a pickle format: data_set
     Two functions:

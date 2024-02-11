@@ -39,13 +39,13 @@ def main() -> None:
             df_maintenance,
         ) = load.load_db_file()
 
-    data = data_preparation.Data_Preparation(
+    data = data_preparation.DataPreparation(
         df_telemetry,
         df_maintenance,
         df_errors,
         df_failures,
     )
-    load_data = data_preparation.Load_Save()
+    load_data = data_preparation.LoadSave()
 
     if os.path.isfile("./pickle_files/data_preparation/data_set") is False:
         data.date_to_time()
