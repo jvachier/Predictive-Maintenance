@@ -1,10 +1,9 @@
 import os.path
 from argparse import ArgumentParser
+
 from keras.models import load_model
 
-from src.modules import data_preparation
-from src.modules import models
-from src.modules import loading
+from src.modules import data_preparation, loading, models
 
 
 def main() -> None:
@@ -21,7 +20,7 @@ def main() -> None:
 
     print("Loading data\n")
 
-    load = loading.Loading_files()
+    load = loading.LoadingFiles()
 
     if os.path.isfile("./pickle_files/loading/telemetry") is False:
         (
