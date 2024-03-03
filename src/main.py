@@ -2,8 +2,7 @@ import os.path
 from argparse import ArgumentParser
 
 from keras.models import load_model
-
-from src.modules import data_preparation, loading, models
+from modules import data_preparation, loading, models
 
 
 def main() -> None:
@@ -81,6 +80,9 @@ def main() -> None:
                 clf_rfc_fit.predict(x_test),
                 clf_rfc_fit.predict_proba(x_test),
             )
+            y_predic_lr_proba = pipe_lr_fit.predict_proba(x_test)
+            y_pred_rfc_proba = clf_rfc_fit.predict_proba(x_test)
+            y_pred_rfc = clf_rfc_fit.predict(x_test)
         else:
             pipe_lr_fit, y_predic_lr, y_predic_lr_proba = save_model.load_model_sklearn(
                 "lr"
