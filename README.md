@@ -8,6 +8,7 @@ The data used over one hundred machines and consisting of:
 Two classes of models are developed:
 - Anomaly detection using unsupervised machine learning algorithms: Isolation Forest and AutoEncoder
 ![plot](./src/figures/anomaly_isolation_forest.png)
+For more details on anomaly detection, the readers are referred to https://github.com/jvachier/Anomaly-Detection-From-Decision-Tree-to-Generative-Model
 - Prediction using supervised machine learning algorithms: Logistic Regression and Random Forest
 ![plot](./src/figures/roc_curves.png)
 ![plot](./src/figures/predictions.png)
@@ -28,8 +29,8 @@ Two classes of models are developed:
         │   ├── data_prepration.py
         │   ├── loading.py
         │   └── models.py
-        ├── pickle_files
-        ├── data
+        ├── pickle_files/
+        ├── data/
         └── figures/ 
 
 
