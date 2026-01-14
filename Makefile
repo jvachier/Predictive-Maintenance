@@ -1,14 +1,13 @@
 install: 
-	python -m pip install --upgrade pip &&\
-		pip install -r requirements.txt
+	uv sync
 
 lint: 
-	pylint --disable=R,C src/
+	uv run pylint --disable=R,C src/
 
 black:
-	python -m black src/
+	uv run black src/
 
 ruff:
-	ruff check src/
-	ruff check --fix src/
-	ruff format src/
+	uv run ruff check src/
+	uv run ruff check --fix src/
+	uv run ruff format src/
