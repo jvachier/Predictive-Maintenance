@@ -1,46 +1,77 @@
-# Allow
-!requirements.txt
+# Python virtual environments
+venv/
+env/
+.venv/
+.env/
+ENV/
+env.bak/
+venv.bak/
 
-# Ignore Mac system files
-.DS_store
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Python distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Testing and linting
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Mac system files
+.DS_Store
 .dSYM
 
-# Ignore all csv files
-*.csv
-
-# Ignore all png files
-# *.png
-*.html
-
-# Ignore all text files
-*.txt
-*.bin
-*.h5
-*.keras
-*.pyc
-*.so
-*.pylintrc
-
+# Project specific data
 *data/
 *videos/
 *pickle_files/
 *predictions/
 
-*__pycache__/
-__pycache__/
-*.ruff_cache/
+# Model files
+*.h5
+*.keras
 
+# Data files
+*.csv
 
-# Ignore specific file
-*.mp4
-
-# Ignore all executable files
-*.o
-*.out
-
-# Ignore jupyter checkpoints
+# Jupyter
 *.ipynb_checkpoints
 *.ipynb
 
-# Ignore all json file
+# Media files
+*.mp4
+*.png
+*.html
+
+# Text and binary files
+*.txt
+*.bin
+*.so
+
+# Compiled executables
+*.o
+*.out
+
+# Config files
+*.pylintrc
 *.json
+
+# Exceptions - files to keep
+!requirements.txt
+!uv.lock
+!pyproject.toml
