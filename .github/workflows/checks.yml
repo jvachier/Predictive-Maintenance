@@ -14,17 +14,15 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.11"]
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        version: "latest"
+        enable-cache: true
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        make install
-    # - name: Black
-    #   run: |
-    #     make black
+      run: uv pip install --system ruff
     - name: Ruff
-      run: |
-        make ruff
+      run: ruff check src/ && ruff format --check src/
