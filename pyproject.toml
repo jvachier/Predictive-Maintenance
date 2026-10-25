@@ -21,7 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black>=24.3.0",
+    "black>=26.10.1",
     "ruff>=0.2.1",
     "pylint>=3.0.3",
 ]
