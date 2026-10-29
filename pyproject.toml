@@ -23,7 +23,7 @@ dependencies = [
 dev = [
     "black>=26.10.1",
     "ruff>=0.2.1",
-    "pylint>=3.0.3",
+    "pylint>=4.0.9",
 ]
 
 [tool.hatch.build.targets.wheel]
